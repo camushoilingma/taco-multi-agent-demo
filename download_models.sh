@@ -21,7 +21,7 @@ mkdir -p "$MODEL_DIR"
 echo ""
 echo "[1/2] Downloading Qwen3-VL-8B-Instruct-AWQ-4bit (~5 GB)..."
 echo "      Used by: Router + Product Advisor (qGPU Slice 1)"
-huggingface-cli download Qwen/Qwen3-VL-8B-Instruct-AWQ-4bit \
+huggingface-cli download cyankiwi/Qwen3-VL-8B-Instruct-AWQ-4bit \
     --local-dir "$MODEL_DIR/qwen3-vl-8b-awq" \
     --local-dir-use-symlinks False
 

@@ -9,7 +9,7 @@ services:
     environment:
       - HUGGING_FACE_HUB_TOKEN=${HF_TOKEN:-}
     command: >
-      --model Qwen/Qwen3-VL-8B-Instruct-AWQ-4bit
+      --model cyankiwi/Qwen3-VL-8B-Instruct-AWQ-4bit
       --dtype half
       --quantization awq
       --max-model-len 2048
