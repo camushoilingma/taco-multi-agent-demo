@@ -13,3 +13,7 @@ ssh_key_id = "skey-xxxxxxxxxx"
 
 # Project name (used for instance name and tags)
 project_name = "taco-demo"
+
+# HuggingFace token (optional — if set, demo auto-starts after bootstrap)
+# Get from: https://huggingface.co/settings/tokens
+# hf_token = "hf_xxxxxxxxxxxxxxxxxxxxxxxxxxxx"

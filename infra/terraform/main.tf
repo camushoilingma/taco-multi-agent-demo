@@ -2,16 +2,23 @@
 # Instance: GN10Xp.2XLARGE40 — 1x NVIDIA V100 32GB, 10 vCPU, 40GB RAM
 # Region: Singapore (ap-singapore), Zone 3
 #
+# This is a FULLY AUTOMATED setup. After `terraform apply`, the instance
+# will self-provision: wait for GPU driver, install Docker + NVIDIA Container
+# Toolkit, mount the data disk, and clone the repo. The only manual step is
+# setting HF_TOKEN and running docker-compose.
+#
 # Usage:
 #   cp terraform.tfvars.example terraform.tfvars  # fill in your values
 #   terraform init
 #   terraform plan
 #   terraform apply
 #
-# After apply, SSH in and run:
+# After apply (~20-30 min for full bootstrap):
 #   ssh ubuntu@<output.public_ip>
-#   cd /data && git clone <repo> && cd taco-multi-agent-demo
-#   export HF_TOKEN=... && docker compose up -d
+#   tail -f /var/log/user-data.log        # monitor bootstrap progress
+#   cd /data/taco-multi-agent-demo
+#   export HF_TOKEN=hf_...
+#   docker-compose up -d                  # first run: ~25-40 min (pulls images + models)
 
 terraform {
   required_providers {
@@ -66,6 +73,13 @@ variable "project_name" {
   default     = "taco-demo"
 }
 
+variable "hf_token" {
+  description = "HuggingFace token for model downloads (optional — can set later via env var)"
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
 # ──────────────────────── Security Group ────────────────────────
 
 resource "tencentcloud_security_group" "demo" {
@@ -88,8 +102,9 @@ resource "tencentcloud_security_group_lite_rule" "demo" {
   ]
 
   egress = [
-    # Allow all outbound
-    "ACCEPT#0.0.0.0/0#ALL#ALL",
+    # HTTPS outbound (Docker Hub, HuggingFace, GitHub, NVIDIA toolkit)
+    # apt uses Tencent internal mirrors via private network, so port 80 not needed
+    "ACCEPT#0.0.0.0/0#443#TCP",
   ]
 }
 
@@ -128,60 +143,94 @@ resource "tencentcloud_instance" "gpu" {
     tencentcloud_security_group.demo.id,
   ]
 
-  # Auto-install GPU driver, Docker, mount data disk, clone repo
+  # Fully automated bootstrap: GPU driver wait, Docker, NVIDIA toolkit,
+  # data disk mount, repo clone, and optionally start the demo
   user_data = base64encode(<<-SCRIPT
     #!/bin/bash
     set -euo pipefail
     exec > /var/log/user-data.log 2>&1
 
-    echo "=== Starting setup $(date) ==="
+    echo "=== Starting bootstrap $(date) ==="
 
-    # Wait for GPU driver installation to complete
-    echo "Waiting for NVIDIA driver..."
-    for i in $(seq 1 60); do
+    # ── Step 1: Wait for GPU driver (auto-installed by Tencent image) ──
+    echo "[1/6] Waiting for NVIDIA driver..."
+    for i in $(seq 1 90); do
       if nvidia-smi &>/dev/null; then
-        echo "NVIDIA driver ready"
+        echo "NVIDIA driver ready after $((i * 10))s"
+        nvidia-smi --query-gpu=name,memory.total --format=csv,noheader
         break
       fi
-      echo "Waiting... ($i/60)"
+      if [ "$i" -eq 90 ]; then
+        echo "ERROR: NVIDIA driver not detected after 15 minutes"
+        exit 1
+      fi
       sleep 10
     done
 
-    # Install Docker
-    echo "Installing Docker..."
-    curl -fsSL https://get.docker.com | sh
-    usermod -aG docker ubuntu
-
-    # Install NVIDIA Container Toolkit
-    echo "Installing NVIDIA Container Toolkit..."
-    curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | \
-      gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
-    curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
-      sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
-      tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
-    apt-get update && apt-get install -y nvidia-container-toolkit
-    nvidia-ctk runtime configure --runtime=docker
-    systemctl restart docker
-
-    # Mount data disk
-    echo "Mounting data disk..."
+    # ── Step 2: Mount data disk ──
+    echo "[2/6] Mounting data disk..."
     if [ -b /dev/vdb ]; then
       mkfs.ext4 -F /dev/vdb
       mkdir -p /data
       mount /dev/vdb /data
       echo '/dev/vdb /data ext4 defaults 0 0' >> /etc/fstab
       chown ubuntu:ubuntu /data
+      echo "Data disk mounted at /data ($(lsblk -n -o SIZE /dev/vdb))"
+    else
+      echo "WARNING: /dev/vdb not found, skipping data disk mount"
+      mkdir -p /data && chown ubuntu:ubuntu /data
     fi
 
-    # Clone repo
-    echo "Cloning demo repo..."
+    # ── Step 3: Install Docker via apt (get.docker.com times out on Tencent) ──
+    echo "[3/6] Installing Docker..."
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get update -qq
+    apt-get install -y -qq docker.io docker-compose
+    usermod -aG docker ubuntu
+    echo "Docker version: $(docker --version)"
+
+    # ── Step 4: Install NVIDIA Container Toolkit ──
+    echo "[4/6] Installing NVIDIA Container Toolkit..."
+    curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | \
+      gpg --dearmor --yes -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
+    curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
+      sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
+      tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
+    apt-get update -qq && apt-get install -y -qq nvidia-container-toolkit
+    nvidia-ctk runtime configure --runtime=docker
+    systemctl restart docker
+
+    # Verify GPU is accessible from Docker
+    if docker run --rm --gpus all nvidia/cuda:12.2.0-base-ubuntu22.04 nvidia-smi &>/dev/null; then
+      echo "Docker GPU access verified"
+    else
+      echo "WARNING: Docker GPU access test failed (may work after image pull)"
+    fi
+
+    # ── Step 5: Clone repo ──
+    echo "[5/6] Cloning demo repo..."
     su - ubuntu -c "cd /data && git clone https://github.com/camushoilingma/taco-multi-agent-demo.git" || true
 
-    echo "=== Setup complete $(date) ==="
-    echo "SSH in and run:"
-    echo "  cd /data/taco-multi-agent-demo"
-    echo "  export HF_TOKEN=hf_..."
-    echo "  docker compose up -d"
+    # ── Step 6: Auto-start if HF_TOKEN is provided ──
+    HF_TOKEN="${var.hf_token}"
+    if [ -n "$HF_TOKEN" ]; then
+      echo "[6/6] Starting demo (HF_TOKEN provided)..."
+      cd /data/taco-multi-agent-demo
+      echo "HF_TOKEN=$HF_TOKEN" > .env
+      su - ubuntu -c "cd /data/taco-multi-agent-demo && docker-compose up -d"
+      echo "Demo starting — containers pulling images and models (~25-40 min)"
+    else
+      echo "[6/6] Skipping auto-start (no HF_TOKEN provided)"
+      echo "To start manually:"
+      echo "  ssh ubuntu@<PUBLIC_IP>"
+      echo "  cd /data/taco-multi-agent-demo"
+      echo "  export HF_TOKEN=hf_..."
+      echo "  docker-compose up -d"
+    fi
+
+    echo ""
+    echo "=== Bootstrap complete $(date) ==="
+    echo "Monitor: tail -f /var/log/user-data.log"
     SCRIPT
   )
 

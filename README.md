@@ -68,7 +68,7 @@ Both are vision-language models — customers can upload photos of damaged produ
 
 ## GPU Instance Setup (Tencent Cloud CVM)
 
-Tested on **GN10Xp.2XLARGE40** (1x V100 32GB, 10 vCPU, 40GB RAM)
+Tested on **GN10Xp.2XLARGE40** (1x V100 32GB, 10 vCPU, 40GB RAM) 
 
 ### 1. Provision the Instance
 
@@ -79,8 +79,27 @@ Tested on **GN10Xp.2XLARGE40** (1x V100 32GB, 10 vCPU, 40GB RAM)
 | System Disk | Enhanced SSD, 100 GiB |
 | Data Disk | Enhanced SSD, 200 GiB |
 | Public IP | Yes, bill by traffic, 100 Mbps |
+| Security Group | See below |
 
 Or use Terraform: `cd infra/terraform && terraform apply`
+
+#### Security Group Rules
+
+**Inbound:**
+
+| Protocol:Port | Source | Purpose |
+|--------------|--------|---------|
+| TCP:22 | 0.0.0.0/0 | SSH |
+| TCP:3000 | 0.0.0.0/0 | Frontend UI |
+| TCP:8000 | 0.0.0.0/0 | Backend API |
+
+**Outbound:**
+
+| Protocol:Port | Destination | Purpose |
+|--------------|-------------|---------|
+| TCP:443 | 0.0.0.0/0 | HTTPS (Docker Hub, HuggingFace, GitHub, NVIDIA toolkit) |
+
+> **Note:** `apt-get` uses Tencent's internal mirror (`mirrors.tencentyun.com`) over the private network, so outbound port 80 is not needed.
 
 ### 2. SSH In
 
@@ -99,21 +118,24 @@ nvidia-smi   # verify V100 is detected
 
 ### 4. Install Docker + NVIDIA Container Toolkit
 
+> **Note:** On Tencent Cloud, `get.docker.com` may time out. Use `apt` to install Docker instead.
+
 ```bash
-# Docker
-curl -fsSL https://get.docker.com | sudo sh
+# Docker (via apt — works on Tencent Cloud internal mirrors)
+sudo apt-get update
+sudo apt-get install -y docker.io docker-compose
 sudo usermod -aG docker $USER
+newgrp docker
 
 # NVIDIA Container Toolkit
 curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | \
-  sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
+  sudo gpg --dearmor --yes -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
 curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
   sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
   sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
 sudo apt-get update && sudo apt-get install -y nvidia-container-toolkit
 sudo nvidia-ctk runtime configure --runtime=docker
 sudo systemctl restart docker
-newgrp docker
 ```
 
 ### 5. Mount the 200GB Data Disk
@@ -133,7 +155,16 @@ cd /data
 git clone https://github.com/camushoilingma/taco-multi-agent-demo.git
 cd taco-multi-agent-demo
 export HF_TOKEN=hf_your_token_here
-docker compose up -d
+docker-compose up -d
+```
+
+> **Note:** The `docker.io` apt package uses `docker-compose` (v1), not `docker compose` (v2).
+
+First run takes **25-40 minutes** (pulling vLLM image ~10GB, downloading AWQ models ~12GB, building app images). Monitor progress with:
+
+```bash
+docker-compose logs -f
+docker-compose ps          # all 4 containers should show "Up"
 ```
 
 The UI will be available at `http://<PUBLIC_IP>:3000`.
