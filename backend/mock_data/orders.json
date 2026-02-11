@@ -1,0 +1,225 @@
+[
+  {
+    "order_id": "ORD-2026-884721",
+    "customer_id": "C-1001",
+    "status": "in_transit",
+    "items": [
+      {"name": "Samsung Galaxy S25 Ultra 256GB", "sku": "PHONE-SAM-S25U", "price": 1299.99, "quantity": 1},
+      {"name": "Samsung S25 Ultra Silicone Case", "sku": "CASE-SAM-S25U", "price": 29.99, "quantity": 1}
+    ],
+    "total": 1329.98,
+    "currency": "EUR",
+    "delivery_fee": 0,
+    "payment_method": "card",
+    "placed_at": "2026-02-09T14:22:00Z",
+    "estimated_delivery": "2026-02-11T18:00:00Z",
+    "carrier": "DPD",
+    "tracking_number": "DPD-RO-889923",
+    "delivery_address": "Str. Victoriei 45, Bucharest",
+    "current_location": "DPD Sorting Center — Out for delivery",
+    "seller": "platform",
+    "is_premium_member": true
+  },
+  {
+    "order_id": "ORD-2026-884599",
+    "customer_id": "C-1001",
+    "status": "delivered",
+    "items": [
+      {"name": "Xiaomi Roborock S8 Pro Robot Vacuum", "sku": "HOME-XIR-S8P", "price": 699.00, "quantity": 1}
+    ],
+    "total": 699.00,
+    "currency": "EUR",
+    "delivery_fee": 0,
+    "payment_method": "card",
+    "placed_at": "2026-02-05T09:15:00Z",
+    "delivered_at": "2026-02-07T11:30:00Z",
+    "carrier": "FAN Courier",
+    "tracking_number": "FAN-RO-112233",
+    "delivery_address": "Str. Victoriei 45, Bucharest",
+    "seller": "platform",
+    "is_premium_member": true
+  },
+  {
+    "order_id": "ORD-2026-884200",
+    "customer_id": "C-1001",
+    "status": "processing",
+    "items": [
+      {"name": "LG OLED TV 55\" C4", "sku": "TV-LG-OLED55C4", "price": 1199.00, "quantity": 1},
+      {"name": "Wall Mount Bracket", "sku": "ACC-MOUNT-TV", "price": 49.00, "quantity": 1},
+      {"name": "TV Installation Service", "sku": "SVC-INSTALL-TV", "price": 59.00, "quantity": 1}
+    ],
+    "total": 1307.00,
+    "currency": "EUR",
+    "delivery_fee": 0,
+    "payment_method": "card",
+    "placed_at": "2026-02-10T20:45:00Z",
+    "estimated_delivery": "2026-02-13T18:00:00Z",
+    "note": "Installation scheduled Feb 14",
+    "seller": "platform",
+    "is_premium_member": true
+  },
+  {
+    "order_id": "ORD-2026-883100",
+    "customer_id": "C-1002",
+    "status": "shipped",
+    "items": [
+      {"name": "Apple MacBook Air M3 15\"", "sku": "LAP-APL-MBAM3", "price": 1549.00, "quantity": 1},
+      {"name": "Apple Magic Mouse", "sku": "ACC-APL-MMOUSE", "price": 89.00, "quantity": 1}
+    ],
+    "total": 1638.00,
+    "currency": "EUR",
+    "delivery_fee": 0,
+    "payment_method": "paypal",
+    "placed_at": "2026-02-08T16:30:00Z",
+    "estimated_delivery": "2026-02-12T18:00:00Z",
+    "carrier": "GLS",
+    "tracking_number": "GLS-RO-445566",
+    "delivery_address": "Bd. Unirii 12, Apt 4, Cluj-Napoca",
+    "current_location": "GLS Regional Hub — Cluj-Napoca",
+    "seller": "platform",
+    "is_premium_member": false
+  },
+  {
+    "order_id": "ORD-2026-882900",
+    "customer_id": "C-1002",
+    "status": "delivered",
+    "items": [
+      {"name": "Sony WH-1000XM5 Headphones", "sku": "AUD-SONY-XM5", "price": 349.00, "quantity": 1}
+    ],
+    "total": 349.00,
+    "currency": "EUR",
+    "delivery_fee": 4.99,
+    "payment_method": "paypal",
+    "placed_at": "2026-01-25T10:00:00Z",
+    "delivered_at": "2026-01-28T14:20:00Z",
+    "carrier": "DPD",
+    "tracking_number": "DPD-RO-778899",
+    "delivery_address": "Bd. Unirii 12, Apt 4, Cluj-Napoca",
+    "seller": "platform",
+    "is_premium_member": false
+  },
+  {
+    "order_id": "ORD-2026-882500",
+    "customer_id": "C-1003",
+    "status": "return_requested",
+    "items": [
+      {"name": "Dyson V15 Detect Cordless Vacuum", "sku": "HOME-DYS-V15", "price": 649.00, "quantity": 1}
+    ],
+    "total": 649.00,
+    "currency": "EUR",
+    "delivery_fee": 0,
+    "payment_method": "bank_transfer",
+    "placed_at": "2026-01-20T08:45:00Z",
+    "delivered_at": "2026-01-23T09:30:00Z",
+    "return_reason": "Defective — motor makes grinding noise",
+    "seller": "platform",
+    "is_premium_member": true
+  },
+  {
+    "order_id": "ORD-2026-882100",
+    "customer_id": "C-1003",
+    "status": "delivered",
+    "items": [
+      {"name": "Philips Air Fryer XXL", "sku": "HOME-PHI-AFXXL", "price": 199.00, "quantity": 1},
+      {"name": "Philips Air Fryer Baking Tray", "sku": "ACC-PHI-AFTRAY", "price": 24.99, "quantity": 1}
+    ],
+    "total": 223.99,
+    "currency": "EUR",
+    "delivery_fee": 0,
+    "payment_method": "bank_transfer",
+    "placed_at": "2026-01-15T14:00:00Z",
+    "delivered_at": "2026-01-18T10:15:00Z",
+    "seller": "marketplace_TechZone",
+    "is_premium_member": true
+  },
+  {
+    "order_id": "ORD-2026-881800",
+    "customer_id": "C-1004",
+    "status": "cancelled",
+    "items": [
+      {"name": "Nintendo Switch OLED", "sku": "GAME-NIN-SWOLED", "price": 349.00, "quantity": 1}
+    ],
+    "total": 349.00,
+    "currency": "EUR",
+    "payment_method": "card",
+    "placed_at": "2026-02-01T11:00:00Z",
+    "cancelled_at": "2026-02-01T13:30:00Z",
+    "cancel_reason": "Found cheaper elsewhere",
+    "seller": "platform",
+    "is_premium_member": false
+  },
+  {
+    "order_id": "ORD-2026-881500",
+    "customer_id": "C-1004",
+    "status": "in_transit",
+    "items": [
+      {"name": "Asus ROG Strix G16 Gaming Laptop", "sku": "LAP-ASUS-ROGG16", "price": 1899.00, "quantity": 1},
+      {"name": "Asus ROG Backpack", "sku": "ACC-ASUS-ROGBP", "price": 79.00, "quantity": 1}
+    ],
+    "total": 1978.00,
+    "currency": "EUR",
+    "delivery_fee": 0,
+    "payment_method": "card",
+    "placed_at": "2026-02-07T09:00:00Z",
+    "estimated_delivery": "2026-02-12T18:00:00Z",
+    "carrier": "Sameday",
+    "tracking_number": "SD-RO-334455",
+    "delivery_address": "Str. Mihai Eminescu 78, Timisoara",
+    "current_location": "Sameday Warehouse — Timisoara, preparing for delivery",
+    "seller": "platform",
+    "is_premium_member": false
+  },
+  {
+    "order_id": "ORD-2026-881200",
+    "customer_id": "C-1005",
+    "status": "delivered",
+    "items": [
+      {"name": "Samsung Galaxy Tab S9 FE", "sku": "TAB-SAM-S9FE", "price": 449.00, "quantity": 1},
+      {"name": "Samsung S Pen", "sku": "ACC-SAM-SPEN", "price": 39.00, "quantity": 1}
+    ],
+    "total": 488.00,
+    "currency": "EUR",
+    "delivery_fee": 0,
+    "payment_method": "card",
+    "placed_at": "2026-01-28T16:00:00Z",
+    "delivered_at": "2026-02-01T11:45:00Z",
+    "carrier": "DPD",
+    "tracking_number": "DPD-HU-556677",
+    "delivery_address": "Andrássy út 22, Budapest",
+    "seller": "marketplace_MobilePlanet",
+    "is_premium_member": false
+  },
+  {
+    "order_id": "ORD-2026-880900",
+    "customer_id": "C-1005",
+    "status": "processing",
+    "items": [
+      {"name": "Bose QuietComfort Ultra Earbuds", "sku": "AUD-BOSE-QCUE", "price": 299.00, "quantity": 1}
+    ],
+    "total": 299.00,
+    "currency": "EUR",
+    "delivery_fee": 4.99,
+    "payment_method": "card",
+    "placed_at": "2026-02-10T19:30:00Z",
+    "estimated_delivery": "2026-02-14T18:00:00Z",
+    "seller": "platform",
+    "is_premium_member": false
+  },
+  {
+    "order_id": "ORD-2026-880600",
+    "customer_id": "C-1001",
+    "status": "delivered",
+    "items": [
+      {"name": "Nike Air Max 90", "sku": "FASH-NIK-AM90", "price": 139.00, "quantity": 1},
+      {"name": "Nike Sports Socks 3-Pack", "sku": "FASH-NIK-SOCK3", "price": 14.99, "quantity": 2}
+    ],
+    "total": 168.98,
+    "currency": "EUR",
+    "delivery_fee": 0,
+    "payment_method": "card",
+    "placed_at": "2026-01-10T12:00:00Z",
+    "delivered_at": "2026-01-13T15:00:00Z",
+    "seller": "marketplace_SportsDirect",
+    "is_premium_member": true
+  }
+]

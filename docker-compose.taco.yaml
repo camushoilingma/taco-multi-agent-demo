@@ -1,0 +1,93 @@
+services:
+  taco-model1:
+    image: ccr.ccs.tencentyun.com/taco/tacollm-dev:latest
+    privileged: true
+    network_mode: host
+    ipc: host
+    shm_size: "16g"
+    volumes:
+      - /data/models:/home/workspace/models
+      - /data/taco-whl:/home/workspace/whl
+    environment:
+      - CUDA_VISIBLE_DEVICES=0:0
+    command: >
+      bash -c "
+        pip3 install /home/workspace/whl/taco_llm-*.whl &&
+        taco_llm serve
+          --model /home/workspace/models/qwen3-vl-8b
+          --dtype auto
+          --max-model-len 4096
+          --port 8081
+          --served-model-name qwen3-vl-8b
+          --api-key demo-key
+          --gpu-memory-utilization 0.90
+      "
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    restart: unless-stopped
+
+  taco-model2:
+    image: ccr.ccs.tencentyun.com/taco/tacollm-dev:latest
+    privileged: true
+    network_mode: host
+    ipc: host
+    shm_size: "16g"
+    volumes:
+      - /data/models:/home/workspace/models
+      - /data/taco-whl:/home/workspace/whl
+    environment:
+      - CUDA_VISIBLE_DEVICES=0:1
+    command: >
+      bash -c "
+        pip3 install /home/workspace/whl/taco_llm-*.whl &&
+        taco_llm serve
+          --model /home/workspace/models/qwen2.5-vl-7b
+          --dtype auto
+          --max-model-len 4096
+          --port 8082
+          --served-model-name qwen2.5-vl-7b
+          --api-key demo-key
+          --gpu-memory-utilization 0.90
+      "
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    restart: unless-stopped
+
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      - MODEL1_BASE_URL=http://localhost:8081/v1
+      - MODEL1_API_KEY=demo-key
+      - MODEL1_NAME=qwen3-vl-8b
+      - MODEL2_BASE_URL=http://localhost:8082/v1
+      - MODEL2_API_KEY=demo-key
+      - MODEL2_NAME=qwen2.5-vl-7b
+      - DEBUG_MODE=true
+    network_mode: host
+    depends_on:
+      - taco-model1
+      - taco-model2
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - BACKEND_URL=http://localhost:8000
+    network_mode: host
+    depends_on:
+      - backend
+    restart: unless-stopped
