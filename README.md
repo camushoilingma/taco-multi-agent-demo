@@ -66,6 +66,78 @@ Both are vision-language models — customers can upload photos of damaged produ
 
 **V100 note**: V100 does not support bfloat16 — all configs use `--dtype half` (FP16).
 
+## GPU Instance Setup (Tencent Cloud CVM)
+
+Tested on **GN10Xp.2XLARGE40** (1x V100 32GB, 10 vCPU, 40GB RAM)
+
+### 1. Provision the Instance
+
+| Setting | Value |
+|---------|-------|
+| Instance Type | GN10Xp.2XLARGE40 |
+| Image | Ubuntu Server 22.04 LTS 64bit (auto GPU driver) |
+| System Disk | Enhanced SSD, 100 GiB |
+| Data Disk | Enhanced SSD, 200 GiB |
+| Public IP | Yes, bill by traffic, 100 Mbps |
+
+Or use Terraform: `cd infra/terraform && terraform apply`
+
+### 2. SSH In
+
+```bash
+chmod 600 ~/.ssh/your_key.pem
+ssh -i ~/.ssh/your_key.pem ubuntu@<PUBLIC_IP>
+```
+
+### 3. Wait for GPU Driver
+
+The auto-install script runs on first boot (~15-25 min). Once your prompt returns:
+
+```bash
+nvidia-smi   # verify V100 is detected
+```
+
+### 4. Install Docker + NVIDIA Container Toolkit
+
+```bash
+# Docker
+curl -fsSL https://get.docker.com | sudo sh
+sudo usermod -aG docker $USER
+
+# NVIDIA Container Toolkit
+curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | \
+  sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
+curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
+  sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
+  sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
+sudo apt-get update && sudo apt-get install -y nvidia-container-toolkit
+sudo nvidia-ctk runtime configure --runtime=docker
+sudo systemctl restart docker
+newgrp docker
+```
+
+### 5. Mount the 200GB Data Disk
+
+```bash
+sudo mkfs.ext4 /dev/vdb
+sudo mkdir -p /data
+sudo mount /dev/vdb /data
+echo '/dev/vdb /data ext4 defaults 0 0' | sudo tee -a /etc/fstab
+sudo chown ubuntu:ubuntu /data
+```
+
+### 6. Clone and Run
+
+```bash
+cd /data
+git clone https://github.com/camushoilingma/taco-multi-agent-demo.git
+cd taco-multi-agent-demo
+export HF_TOKEN=hf_your_token_here
+docker compose up -d
+```
+
+The UI will be available at `http://<PUBLIC_IP>:3000`.
+
 ## Configuration
 
 | Variable | Default | Description |
