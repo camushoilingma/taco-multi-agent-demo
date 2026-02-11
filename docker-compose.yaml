@@ -9,9 +9,10 @@ services:
     environment:
       - HUGGING_FACE_HUB_TOKEN=${HF_TOKEN:-}
     command: >
-      --model Qwen/Qwen3-VL-8B-Instruct
-      --dtype auto
-      --max-model-len 4096
+      --model Qwen/Qwen3-VL-8B-Instruct-AWQ-4bit
+      --dtype half
+      --quantization awq
+      --max-model-len 2048
       --port 8081
       --served-model-name qwen3-vl-8b
       --api-key demo-key
@@ -41,9 +42,10 @@ services:
     environment:
       - HUGGING_FACE_HUB_TOKEN=${HF_TOKEN:-}
     command: >
-      --model Qwen/Qwen2.5-VL-7B-Instruct
-      --dtype auto
-      --max-model-len 4096
+      --model Qwen/Qwen2.5-VL-7B-Instruct-AWQ
+      --dtype half
+      --quantization awq
+      --max-model-len 2048
       --port 8082
       --served-model-name qwen2.5-vl-7b
       --api-key demo-key

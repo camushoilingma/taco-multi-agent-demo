@@ -1,0 +1,15 @@
+# Tencent Cloud API credentials
+# Get from: https://console.cloud.tencent.com/cam/capi
+secret_id  = "AKIDxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+secret_key = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+
+# Region and zone
+region            = "ap-singapore"
+availability_zone = "ap-singapore-3"
+
+# SSH key pair ID — find in CVM > SSH Key Pairs
+# e.g. "skey-xxxxxxxxxx"
+ssh_key_id = "skey-xxxxxxxxxx"
+
+# Project name (used for instance name and tags)
+project_name = "taco-demo"

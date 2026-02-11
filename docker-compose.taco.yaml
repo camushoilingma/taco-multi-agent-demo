@@ -14,9 +14,10 @@ services:
       bash -c "
         pip3 install /home/workspace/whl/taco_llm-*.whl &&
         taco_llm serve
-          --model /home/workspace/models/qwen3-vl-8b
-          --dtype auto
-          --max-model-len 4096
+          --model /home/workspace/models/qwen3-vl-8b-awq
+          --dtype half
+          --quantization awq
+          --max-model-len 2048
           --port 8081
           --served-model-name qwen3-vl-8b
           --api-key demo-key
@@ -46,9 +47,10 @@ services:
       bash -c "
         pip3 install /home/workspace/whl/taco_llm-*.whl &&
         taco_llm serve
-          --model /home/workspace/models/qwen2.5-vl-7b
-          --dtype auto
-          --max-model-len 4096
+          --model /home/workspace/models/qwen2.5-vl-7b-awq
+          --dtype half
+          --quantization awq
+          --max-model-len 2048
           --port 8082
           --served-model-name qwen2.5-vl-7b
           --api-key demo-key
